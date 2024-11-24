@@ -10,7 +10,7 @@ export const role = selector({
     key:'role',
     get: ({ get }) => {
         const authData = get(authCheck);
-        return authData.role || [];
+        return authData!.role || [];
     },
 })
 

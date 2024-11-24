@@ -10,7 +10,7 @@ interface RequireAuthProps {
 
 const RequireAuth = ({ allowedRoles }: RequireAuthProps) => {
   const isAuthenticated = useRecoilValueLoadable(authCheck);
-  const location = useLocation(); // Capture the current location
+  const location = useLocation();
   if(isAuthenticated.state === 'hasValue'){
   const hasRequiredRole = isAuthenticated ? allowedRoles.includes(isAuthenticated.contents?.role || '') : false;
 

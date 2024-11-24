@@ -3,15 +3,14 @@ import { authCheck } from "@/store/auth";
 import { useEffect, useMemo, useState } from "react";
 
 const useAuth = () => {
-  const user = useRecoilValueLoadable(authCheck); // Loadable to handle async state
-  const resetAuth = useResetRecoilState(authCheck); // Reset auth state on logout
+  const user = useRecoilValueLoadable(authCheck); 
+  const resetAuth = useResetRecoilState(authCheck); 
 
-  const [userData, setUserData] = useState<any | null>(null); // Local state to store user info
+  const [userData, setUserData] = useState<any | null>(null); 
 
-  // UseEffect to sync with Recoil state
   useEffect(() => {
     if (user.state === "hasValue") {
-      setUserData(user.contents); // Store user data locally when loaded
+      setUserData(user.contents); 
     } else if (user.state === "hasError") {
       console.error("Failed to fetch user data:", user.contents);
     }

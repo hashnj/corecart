@@ -70,3 +70,15 @@ declare interface signInProps {
 declare interface getUserInfoProps {
   userId: string;
 }
+
+declare interface WishlistItem {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+}
+
+declare interface WishlistResponse {
+  message: string;
+  data: WishlistItem[];
+}

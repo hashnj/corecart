@@ -11,9 +11,10 @@ import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import WishPage from "./pages/WishPage";
 import CartPage from "./pages/CartPage";
-import Products from "./pages/Products";
+import { Product } from "./pages/Products";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Test from "./pages/Test";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -44,26 +45,27 @@ function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="wishlist" element={<WishPage />} />
               <Route path="cart" element={<CartPage />} />
-              <Route path="explore" element={<Products />} />
-
+              <Route path="explore" element={<Product />} />
               
               <Route path="*" element={<NotFound />} />
 
+            </Route>
+            <Route element={<RequireAuth allowedRoles={['Customer', 'Admin', 'Vendor','']} />}>
+            <Route path="test" element={<Test />} />
             </Route>
           </Route>
         </Routes>
       </BrowserRouter>
       <ToastContainer
-      position="top-right"
-      autoClose={3000}
+      position="bottom-right"
+      autoClose={1000}
       hideProgressBar={false}
-      newestOnTop={false}
+      newestOnTop={true}
       closeOnClick
       rtl={false}
       pauseOnFocusLoss
       draggable
-      pauseOnHover
-      theme="light" // or "dark"
+      theme="dark" 
     />
     </Suspense>
   );

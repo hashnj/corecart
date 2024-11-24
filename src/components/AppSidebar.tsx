@@ -28,7 +28,6 @@ import { toast } from "react-toastify";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import axiosInstance from "@/lib/axiosInstance";
 import { AuthResponse } from "@/types";
-// import useAuth from "@/hooks/auth";
 
 const items = [
   { title: "Home", url: "/", icon: FaHome },
@@ -36,6 +35,7 @@ const items = [
   { title: "Cart", url: "/cart", icon: FaCartPlus },
   { title: "Explore", url: "/explore", icon: FaSearch },
   { title: "Settings", url: "/settings", icon: IoSettings },
+  { title: "test", url: "/test", icon: IoSettings },
 ];
 
 const FormSchema = z.object({
@@ -46,7 +46,6 @@ export function AppSidebar() {
   const user = useRecoilValueLoadable(authCheck);
   const [data,setData]= useState<AuthResponse | null>(null); 
   const [authh,setAuth] = useRecoilState(auth);
-  // const { userData, logout } = useAuth();
   const nav = useNavigate();
   const mobile = useIsMobile();
   const [mode, setMode] = useState<boolean | null>(null);
