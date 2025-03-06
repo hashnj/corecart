@@ -1,3 +1,4 @@
+// import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { WishList } from "./Wishlist";
 import { Cartt } from "./Cart";
 import { useNavigate } from "react-router-dom";
@@ -6,18 +7,21 @@ interface ProductCardProps {
   image: string[];
   title: string;
   description: string;
-  mrp: number;
+  tags: string;
+  discount: number;
   vendor: string;
   stock: number;
   price: number;
   id: string;
+  userId?: string; 
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
-  image,
+  image = [],
   title,
+  tags,
   description,
-  mrp,
+  discount,
   vendor,
   stock,
   price,
@@ -25,74 +29,71 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const nav = useNavigate();
 
+  const tagColors: Record<string, string> = {
+    seafood: "bg-blue-500",
+    fragrances: "bg-purple-500",
+    beauty: "bg-pink-500",
+    furniture: "bg-yellow-600",
+    vegetable: "bg-green-500",
+    dairy: "bg-cyan-500",
+    default: "bg-gray-500",
+  };
+
+  // Calculate Discounted Price
+  const discountedPrice = Number((price - (price * discount) / 100).toFixed(2));
+
   return (
-    <div
-      className={`max-w-xs rounded-lg max-h-fit border border-text/20 mx-auto w-full bg-background group cursor-pointer overflow-hidden hover:shadow-primary/40 hover:shadow-[0_0_10px] m-4`}
-    >
-      <div className="my-auto relative group">
-        {price < mrp && (
-          <div className="bg-red-700 px-2 absolute z-10 rounded-br-2xl text-white/80 py-1 my-auto">
-            {["Sale", "Hot", "Deal"][Math.floor(Math.random() * 3)]}
+    <div className="max-w-xs rounded-lg border border-text/10 mx-auto w-full bg-backgrounds/30 group cursor-pointer overflow-hidden hover:shadow-text/10 hover:shadow-md transition m-4">
+      <div className="relative h-3/4">
+        {/* Tag Label */}
+        <div
+          className={`px-2 absolute top-0 left-0 z-10 rounded-br-2xl ${
+            tagColors[tags.toLowerCase()] || tagColors.default
+          } text-white/80 py-1`}
+        >
+          {tags}
+        </div>
+
+        {Math.floor(discount) > 0 && (
+          <div className="px-2 absolute top-0 right-0 z-10 rounded-br-2xl text-red-800/70 hover:text-red-700 py-1">
+            {Math.floor(discount)}% off
           </div>
         )}
 
         <img
           onClick={() => nav(`/product/${id}`)}
-          className="peer group-focus:bg-background/20 group-hover:scale-105 transition-all duration-500 rounded-3xl w-full max-h-72 mx-auto p-2 md:h-56 lg:h-64 xl:h-72"
-          src={image[0]}
+          className="peer group-hover:scale-105 transition-all duration-500 rounded-3xl w-full h-72 m-auto p-2 object-cover"
+          src={image.length > 0 ? image[0] : "/default-placeholder.png"} // Handle missing image
           alt={title}
         />
 
-        <div className="group-hover:flex hidden absolute -top-0 right-0 height-20 width-4">
-          <div className="p-1">
-            <WishList  id={id} />
-          </div>
+        <div className="absolute top-5 right-2 hidden group-hover:flex flex-col space-y-2">
+          <WishList id={id}  />
+          <Cartt quty={stock} id={id} />
         </div>
+      </div>
 
-        <div className="absolute right-0 bottom-0">
-          <div className="p-1">
-            <Cartt quty={stock}  id={id} />
-          </div>
-        </div>
-
-        <div
-          onClick={() => nav(`/product/${id}`)}
-          className="py-2 text-center w-full rounded-b-lg from-text/20 to-text/10 via-backgrounds"
-        >
-          <div className="font-bold text-text text-xl flex justify-between mx-2">
-            <div className="flex flex-col items-start">
-              <div className="ml-2 capitalize">{title}</div>
-              <div className="flex justify-between mx-2">
-                <p className="text-text/60 text-base mb-1">
-                  {description.substring(0, 12)}
-                  {description.length > 12 ? "..." : ""}
-                </p>
-              </div>
-            </div>
-            <div className="flex">
-              <p
-                className="text-text/40 mx-2 mt-3 max-w-fit font-thin hover:text-primary flex text-sm underline-offset-2 underline mb-1"
-                onClick={(e) => e.stopPropagation()}
-              >
-                by -{vendor}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex ml-4 mb-1">
-            <p
-              className={`text-primary ${
-                mrp >price
-                  ? "line-through text-red-500 pt-1 pr-[6px] text-base"
-                  : "text-xl"
-              }`}
-            >
-              ${mrp > price ? mrp : price}
+      <div className="py-2 text-center w-full border-t border-text/5 rounded-b-lg flex flex-col">
+        <div className="font-bold text-text text-xl mx-2 flex justify-between">
+          <div className="flex flex-col items-start">
+            <p className="capitalize">
+              {title.length > 15 ? `${title.slice(0, 14)}...` : title}
             </p>
-            {price < mrp && (
-              <p className="text-primary text-xl">${price}</p>
-            )}
+            <p className="text-text/60 text-sm truncate w-44">{description}</p>
           </div>
+        </div>
+
+        {/* Price & Vendor */}
+        <div className="flex ml-2 mb-1 items-center justify-between mx-4">
+          {discount > 0 ? (
+            <div className="flex">
+              <p className="text-red-500 font-bold line-through m-auto text-xs">${price}</p>
+              <p className="text-primary text-xl font-bold ml-2">${discountedPrice}</p>
+            </div>
+          ) : (
+            <p className="text-primary text-xl font-bold">${discountedPrice}</p>
+          )}
+          <p className="text-text/40 text-sm underline-offset-2 underline">by {vendor}</p>
         </div>
       </div>
     </div>

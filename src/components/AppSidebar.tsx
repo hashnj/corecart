@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Sidebar,
   SidebarContent,
@@ -24,10 +25,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {  auth, authCheck } from "@/store/auth"; 
 import { useRecoilState, useRecoilValueLoadable } from "recoil"; 
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import axiosInstance from "@/lib/axiosInstance";
+// import axiosInstance from "@/lib/axiosInstance";
 import { AuthResponse } from "@/types";
+import { useLogout } from "@/store/user";
 
 const items = [
   { title: "Home", url: "/", icon: FaHome },
@@ -45,7 +47,7 @@ const FormSchema = z.object({
 export function AppSidebar() {
   const user = useRecoilValueLoadable(authCheck);
   const [data,setData]= useState<AuthResponse | null>(null); 
-  const [authh,setAuth] = useRecoilState(auth);
+  const [authh,_setAuth] = useRecoilState(auth);
   const nav = useNavigate();
   const mobile = useIsMobile();
   const [mode, setMode] = useState<boolean | null>(null);
@@ -63,7 +65,7 @@ export function AppSidebar() {
 
 useEffect(()=>{
   if(user.state=='hasValue'){
-    console.log(user.contents);
+    // console.log(user.contents);
     setData(user.contents);
   }
 },[user,authh])
@@ -83,24 +85,25 @@ useEffect(()=>{
     document.body.classList.toggle("light", !value);
   };
 
-  const handleLogOut = async () => {
-    try {
-      const response = await axiosInstance.post("/auth/logout", {});
+  const handleLogOut = useLogout();
+  // async () => {
+  //   try {
+  //     const response = await axiosInstance.post("/auth/logout", {});
       
-      if (response.status === 200) {
-        setAuth(null);
-        setData(null);
+  //     if (response.status === 200) {
+  //       setAuth(null);
+  //       setData(null);
         
-        toast.success("Logged out successfully!"); 
-        user
-      } else {
-        toast.error("Logout failed."); 
-      }
-    } catch (error: any) {
-      console.error("Logout error:", error);
-      toast.error("Logged out already!!!");
-    }
-  };
+  //       toast.success("Logged out successfully!"); 
+  //       user
+  //     } else {
+  //       toast.error("Logout failed."); 
+  //     }
+  //   } catch (error: any) {
+  //     console.error("Logout error:", error);
+  //     toast.error("Logged out already!!!");
+  //   }
+  // };
 
 
   if (mode === null) return null; 
@@ -108,13 +111,13 @@ useEffect(()=>{
   return (
     <Sidebar className="border-r-2 border-text/20" collapsible="offcanvas">
       <SidebarHeader className="mt-4 flex flex-row justify-between items-center w-full">
-        <SidebarTrigger className={mobile ? 'flex' : 'hidden'} />
-        <div className="mx-7 text-lg font-bold">MENU</div>
+        <SidebarTrigger className={` text-primary + {mobile ? 'flex' : 'hidden'} `}/>
+        <div className={`mx-7 text-2xl text-primary font-bold ${mobile ? 'flex' : 'hidden'}`}>CoreCart</div>
       </SidebarHeader>
 
       <SidebarContent className="pl-2">
-        <SidebarGroup className=" mt-6">
-        <SidebarGroupLabel className="border-b rounded-none border-text/10">Navigation</SidebarGroupLabel>
+        <SidebarGroup className={`${mobile ? 'mt-6':'mt-[37px]'}`}>
+        <SidebarGroupLabel className={`border-b rounded-none border-text/10 `}>Navigation</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
             {items.map((item) => (
@@ -122,8 +125,8 @@ useEffect(()=>{
                 <SidebarMenuButton asChild>
                 <div
                   key={item.title}
-                  className={`flex items-center p-2 cursor-pointer ${
-                    isActive(item.url) ? "text-primary hover:text-primary" : ""
+                  className={`flex items-center hover:text-blue-500 p-2 cursor-pointer ${
+                    isActive(item.url) ? "text-primary hover:text-purple-400" : "text-text"
                   }`}
                   onClick={() => nav(item.url)}
                 >

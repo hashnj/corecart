@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import {  useRecoilState, useRecoilValueLoadable } from "recoil";
 import { detailsSelector } from "../store/details";

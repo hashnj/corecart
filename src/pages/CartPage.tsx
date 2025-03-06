@@ -1,179 +1,163 @@
-import { FaArrowLeft } from "react-icons/fa";
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+/* eslint-disable react-hooks/exhaustive-deps */
 import CartPageComponent from "@/components/CartPageComponent";
-import { useEffect, useState, useCallback } from "react";
-import { useRecoilState, useRecoilValueLoadable } from "recoil";
+import { STRIPE_PUBLIC_KEY } from "@/config";
+import axiosInstance from "@/lib/axiosInstance";
+import { CartItem, cartState, getCart, removeFromCart, updateCartQuantity } from "@/store/cart";
+import { loadStripe } from "@stripe/stripe-js";
+import { useEffect, useState } from "react";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { cartState, getCart } from "@/store/cart";
-import { buyM } from "@/store/buy";
-import { BuyProcessing } from "@/components/BuyProcessing";
+import { useRecoilState, useRecoilValue, useRecoilRefresher_UNSTABLE } from "recoil";
 
-interface CartItem {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  mrp: number;
-  stock: number;
-  images: string;
-  quantity: number; 
-}
-
-const CartPage = () => {
+const CartPage: React.FC = () => {
   const navigate = useNavigate();
-  const cartLoadable = useRecoilValueLoadable(getCart);
-  const [subTotal, setSubTotal] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [cartItems, setCartItems] = useRecoilState(cartState);
-  const [top, setTop] = useState(12);
-  const [buy, setBuy] = useRecoilState(buyM);
-
-  
+  const cartItems = useRecoilValue(getCart);
+  const [cart, setCart] = useRecoilState<CartItem[]>(cartState);
+  const refreshCart = useRecoilRefresher_UNSTABLE(getCart);   
+  const [loading, setLoading] = useState<boolean>(true);
+  const [subTotal, setSubTotal] = useState<number>(0);
+  const [total, setTotal] = useState<string>("0");
 
   useEffect(() => {
-    if (cartLoadable.state === 'hasValue' && cartLoadable.contents) {
-      setCartItems(cartLoadable.contents.products);
+    refreshCart();
+  },[]);
+
+  useEffect(() => {
+    if (cartItems) {
+      setCart(cartItems);
+      setLoading(false);
     }
-  }, [cartLoadable, setCartItems]);
+  }, [cartItems, setCart]);
 
-  const calculateSubTotal = useCallback(() => {
-    if (cartItems.length > 0) {
-      const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      setSubTotal(total);
+  useEffect(() => {
+    const totalAmount = cart.reduce((sum, item) => sum + item.product_id.price * item.quantity, 0);
+    setSubTotal(totalAmount);
+    setTotal((totalAmount + 0.0 * totalAmount).toFixed(2));
+  }, [cart]);
+
+  const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axiosInstance.post(`/order/create-checkout-session`, {
+        cartItems: cart,
+      });
+
+      const stripe = await stripePromise;
+      await stripe?.redirectToCheckout({ sessionId: data.id });
+    } catch (error) {
+      console.error("Stripe Checkout Error:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [cartItems]);
-
-  useEffect(() => {
-    calculateSubTotal();
-  }, [calculateSubTotal]);
-
-  useEffect(() => {
-    const extra = subTotal > 0 ? 12.01 : 0;
-    setTotal(parseFloat((subTotal + extra + 0.18 * subTotal).toFixed(2)));
-  }, [subTotal]);
-
-  const snap = () => setTop(1 + window.scrollY);
-
-  useEffect(() => {
-    window.addEventListener('scroll', snap);
-    return () => window.removeEventListener('scroll', snap);
-  }, []);
-
-  const handleIncrement = (id: string) => {
-    setCartItems((prevList) =>
-      prevList.map((item) =>
-        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
   };
 
-  const handleDecrement = (id: string) => {
-    setCartItems((prevList) =>
-      prevList.map((item) =>
-        item._id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
+  const handleIncrement = async (id: string) => {
+    const product = cart.find((item) => item.product_id._id === id);
+    if (product) {
+      await updateCartQuantity(id, product.quantity + 1, setCart);
+    }
   };
 
-  if (cartLoadable.state === 'loading') {
+  const handleDecrement = async (id: string) => {
+    const product = cart.find((item) => item.product_id._id === id);
+    if (product && product.quantity > 1) {
+      await updateCartQuantity(id, product.quantity - 1, setCart);
+    } else {
+      await removeFromCart(id, setCart);
+    }
+  };
+
+  // if (loading) {
+  //   return (
+  //     <div className="bg-background text-text text-6xl w-screen h-screen flex justify-center items-center">
+  //       <AiOutlineLoading3Quarters className="animate-spin" />
+  //     </div>
+  //   );
+  // }
+
+  if (cart.length === 0) {
     return (
-      <div className="bg-background text-text text-6xl w-screen h-screen flex justify-center items-center">
-        <AiOutlineLoading3Quarters className="animate-spin" />
+      <div className="text-center flex justify-center items-center h-screen text-xl font-extrabold text-text/50">
+        Your cart is empty
       </div>
     );
   }
 
-  if (cartLoadable.state === 'hasError') {
-    return <div>Error loading cart items</div>;
-  }
+  return (
+    <div className="bg-background rounded-md p-2 text-text w-full min-h-screen flex flex-col">
+      <div onClick={() => navigate(-1)} className="border-text/50 w-12 flex justify-center mt-6 ml-6 border hover:bg-primary/70 active:bg-primary hover:text-background cursor-pointer bg-primary p-1 px-2 rounded-md text-lg font-semibold">
+        <FaArrowLeft />
+      </div>
+      <div className="flex w-full justify-center text-4xl font-extrabold font-serif text-primary">
+        Cart
+      </div>
 
-  if (cartLoadable.state === 'hasValue') {
-    return (
-      <div className="bg-background rounded-md text-text w-full absolute h-fit min-h-screen">
-        {buy && (
-          <div className="fixed h-screen inset-0 flex justify-center items-center z-10 backdrop-blur-sm">
-            <div className="max-w-xl w-4/5 md:w-3/5 max-h-5/6 h-5/6 border-2 border-text/10 relative bg-background rounded-lg shadow-lg">
-              <BuyProcessing />
-            </div>
-          </div>
-        )}
-        <div
-          onClick={() => navigate(-1)}
-          className="border-text/50 w-12 flex justify-center relative top-12 left-12 border hover:bg-primary/70 active:bg-primary hover:text-background cursor-pointer bg-primary p-1 px-2 rounded-md text-lg font-semibold"
-        >
-          <FaArrowLeft />
-        </div>
-        <div className="flex w-full justify-center cursor-default text-4xl font-extrabold font-serif text-primary">
-          Cart
-        </div>
-        <div className="overflow-y-scroll overflow-x-hidden p-4 w-full grid grid-cols-2 md:grid-cols-3 ml-5 no-scroll">
-          {cartItems.map((item) => (
-            <div key={item._id} className="mr-7 ml-2 col-span-2 grid-cols-1">
+      <div className="grid grid-cols-3 flex-col w-full">
+        <div className="w-full col-span-3 md:col-span-2 ">
+          <div className="gap-4 px-4">
+            {cart.map((item) => (
               <CartPageComponent
-                title={item.name}
-                description={item.description}
-                price={item.price}
-                image={item.images}
-                mrp={item.mrp}
-                id={item._id}
-                quty={item.stock}
+                key={item.product_id._id}
+                title={item.product_id.title}
+                description={item.product_id.description}
+                price={item.product_id.price}
+                images={item.product_id.images}
+                stock={item.product_id.stock}
+                mrp={item.product_id.mrp}
+                id={item.product_id._id}
+                quty={item.product_id.stock}
                 quantity={item.quantity}
                 onIncrement={handleIncrement}
                 onDecrement={handleDecrement}
               />
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
 
-          <div className="cursor-default md:absolute top-20 mr-5 md:w-1/3 col-span-2 md:col-span-1 right-0 h-[calc(100%-90px)] text-text/50">
-            <div
-              className="sticky flex text-lg font-medium m-2 bg-background border-2 border-text/50 hover:border-text/30 scale-[.99] hover:scale-100 rounded-md min-h-56 h-fit flex-wrap text-wrap transition-all ease-in-out duration-700"
-              style={{ top: `${top}px` }}
-            >
-              <div className="w-full p-2 px-4 border-b-2 border-text/10">
-                <div className="text-center text-primary text-2xl font-serif">CART SUMMARY</div>
-                <div className="flex w-full justify-between px-2">
-                  <div className="font-extrabold text-start text-text w-1/3">Products</div>
-                  <div className="font-extrabold text-center text-text w-1/3">Price</div>
-                  <div className="font-extrabold text-end text-text w-1/3">Quty.</div>
-                </div>
-                {cartItems.map((item) => (
-                  <div key={item._id} className="flex w-full px-2 font-normal text-text/85 justify-between">
-                    <div className="w-1/3 text-start">{item.name}</div>
-                    <div className="w-1/3 text-center">
-                      $ <span className="font-medium ">{item.price}</span>
-                    </div>
-                    <div className="text-end w-1/3">
-                      X {item.stock < 1 ? <>0 <div className="text-xs font-thin text-red-400">(out of stock)</div></> : item.quantity}
-                    </div>
+        <div className="w-full col-span-3 md:col-span-1  mt-6   ">
+          <div className="sticky top-24 my-3 bg-background border-2 border-text/50 hover:border-text/30 rounded-md p-4 shadow-lg">
+            <h2 className="text-center text-primary text-2xl font-serif">CART SUMMARY</h2>
+
+            <div className="text-lg font-medium">
+              <div>
+                {cart.map((item) => (
+                  <div key={item.product_id._id} className="flex justify-between font-thin py-2">
+                    <span>{item.product_id.title}</span>
+                    <span>${item.product_id.price.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
-              <div className="flex text-text flex-col w-full p-4 pb-1 border-b-2 border-text/10">
-                <span>Sub-Total: $<span className="pl-1 font-semibold">{subTotal}</span></span>
-                <span>Shipping: $<span className="pl-1 font-semibold">{subTotal > 0 ? '12.01' : '0'}</span></span>
+              <div className="flex justify-between py-2">
+                <span>Subtotal:</span>
+                <span className="font-thin">${subTotal.toFixed(2)}</span>
               </div>
-              <div className="w-full flex text-text flex-col justify-between p-4 pt-0">
-                <div>Total: $<span className="pl-1 font-semibold">{total}</span></div>
-                <div className="w-full flex justify-end font-thin text-text/80 text-sm">**Inclusive of all TAX</div>
-                <button
-                  className="bg-primary mt-4 p-2 w-full rounded-md overflow-hidden h-10 group"
-                  onClick={() => {
-                    setBuy(true);
-                  }}
-                >
-                  <div className="text-background font-bold text-lg">Checkout</div>
-                </button>
+              <div className="flex justify-between py-2">
+                <span>Shipping:</span>
+                <span className="font-base text-text/50">Free*</span>
               </div>
+              <div className="flex justify-between py-2 border-t border-text/20">
+                <span>Total:</span>
+                <span className="font-semibold">${total}</span>
+              </div>
+              <div className="text-right text-sm text-text/60">**Inclusive of all TAX</div>
             </div>
+
+            <button
+        onClick={handleCheckout}
+        disabled={loading}
+        className="bg-primary text-white px-6 justify-center items-center py-3 rounded-lg hover:bg-primary/85 flex transition-all duration-200 disabled:bg-primary/70 w-full mt-4 text-lg font-bold"
+      >
+        {loading && <AiOutlineLoading3Quarters className="animate-spin text-white mr-2" />}
+        {loading ? "Processing" : "Proceed to Payment"}
+      </button>
           </div>
         </div>
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 };
 
 export default CartPage;

@@ -8,12 +8,14 @@ import CustomInput from '@/components/CustomInput';
 import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AuthFormProps, AuthResponse, LoginUser, SignUpParams } from '@/types';
+import { AuthFormProps, AuthResponse, signInProps, signupProps } from '@/types';
 import axiosInstance from '@/lib/axiosInstance';
 import { FaCartPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useRecoilState } from 'recoil';
 import { auth } from '@/store/auth';
+import { syncCart } from "@/utils/syncCart";
+
 
 const AuthForm = ({ type }: AuthFormProps) => {
   const [user, setUser] = useRecoilState<AuthResponse | null>(auth);
@@ -38,41 +40,49 @@ const AuthForm = ({ type }: AuthFormProps) => {
   });
 
  
-  const handleSignUp = async (data: SignUpParams) => {
+  const handleSignUp = async (data: signupProps) => {
     try {
-      const response = await axiosInstance.post<AuthResponse>('/auth/signup', data);
-      console.log(response);
+      const response = await axiosInstance.post<AuthResponse>("/auth/signup", data);
       setUser(response.data);
-      if(user){
-      toast.success('Successfully registered!');
-      nav('/');}
+  
+      const localCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
+      await syncCart(localCart);
+      localStorage.removeItem("guestCart");
+  
+      toast.success("Successfully registered!");
+      nav("/");
     } catch (error) {
-      console.error('Signup error:', error);
-      toast.error('Failed to register.');
-      throw error;
+      console.error("Signup error:", error);
+      toast.error("Failed to register.");
     }
   };
+  
 
-  const handleSignIn = async (data: LoginUser) => {
+  const handleSignIn = async (data: signInProps) => {
     try {
       const response = await axiosInstance.post<AuthResponse>('/auth/signin', data);
       setUser(response.data);
-      toast.success('Signed in successfully!');
+      
+      const localCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
+      await syncCart(localCart);
+      localStorage.removeItem("guestCart");
+  
+      toast.success("Signed in successfully!");
       nav('/');
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Failed to sign in.');
-      throw error;
+      console.error("Login error:", error);
+      toast.error("Failed to sign in.");
     }
   };
+
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
       if (type === 'sign-up') {
-        await handleSignUp(data as SignUpParams);
+        await handleSignUp(data as signupProps);
       } else if (type === 'sign-in') {
-        await handleSignIn(data as LoginUser);
+        await handleSignIn(data as signInProps);
       }
     } catch (e) {
       console.error(e);
@@ -183,13 +193,11 @@ export default AuthForm
 
 
 //   {
-  //     firstName:data.firstName,
-  //     lastName:data.lastName,
+  //     userName:data.firstName,
   //     email: data.email,
   //     password: data.password,
-  //     address1: data.address1,
+  //     address: data.address1,
   //     state: data.state,
   //     postalCode:data.postalCode,
-  //     dob: data.dob,
-  //     ssn: data.ssn,
+  //     password
   // }

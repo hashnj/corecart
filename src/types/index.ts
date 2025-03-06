@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface WishlistItem {
   id: string;
   name: string;
@@ -17,16 +18,26 @@ export interface DividingCriteria {
 
 export interface Product {
   _id: string;
-  name: string;
+  title: string;
   description: string;
-  mrp: number;
-  price: number;
-  stock: number;
-  image: string;
   category: string;
-  orderSizes: string[];
-  dividingCriteria: DividingCriteria[];
-  [key: string]: any; 
+  price: number;
+  discountPercentage?: number;
+  rating?: number;
+  stock?: number;
+  tags?: string[];
+  brand?: string;
+  sku?: string;
+  weight?: number;
+  warrantyInformation?: string;
+  shippingInformation?: string;
+  availabilityStatus?: string;
+  reviews?: Review[];
+  returnPolicy?: string;
+  minimumOrderQuantity?: number;
+  images?: string[];
+  thumbnail?: string;
+ 
 }
 
 export interface SubCategory {
@@ -84,4 +95,29 @@ export interface CategoryEditState {
   isSubCategory: boolean;
   parent: string;
   cat_img: string;
+}
+
+export type AuthResponse = {
+  username: string;
+  email: string;
+  addresses: string[]; 
+  role: string;
+}
+
+export declare interface AuthFormProps {
+  type: "sign-in" | "sign-up";
+}
+
+
+export declare interface signInProps {
+  email: string;
+  password: string;
+}
+export declare interface signupProps {
+  email: string;
+  password: string;
+  userName:string,
+  address:string ,
+  state:string ,
+  postalCode:string,
 }

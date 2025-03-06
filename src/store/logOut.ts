@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { selector } from "recoil";
 import { auth } from "./auth"; 
 import axiosInstance from "@/lib/axiosInstance";

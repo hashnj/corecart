@@ -1,10 +1,11 @@
-import { useRecoilValueLoadable, useResetRecoilState } from "recoil";
-import { authCheck } from "@/store/auth";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useRecoilValueLoadable, useSetRecoilState } from "recoil";
+import { auth, authCheck } from "@/store/auth";
 import { useEffect, useMemo, useState } from "react";
 
 const useAuth = () => {
   const user = useRecoilValueLoadable(authCheck); 
-  const resetAuth = useResetRecoilState(authCheck); 
+  const setAuthState = useSetRecoilState(auth); 
 
   const [userData, setUserData] = useState<any | null>(null); 
 
@@ -17,14 +18,15 @@ const useAuth = () => {
   }, [user]);
 
   const authState = useMemo(() => {
+    // console.log(userData);
     return {
       isAuthenticated: () =>
-        !!userData?.accessToken && userData.expiresAt > new Date(),
+        !!userData?.accessToken ,
     };
   }, [userData]);
 
   const logout = () => {
-    resetAuth(); 
+    setAuthState(null); 
     setUserData(null); 
   };
 

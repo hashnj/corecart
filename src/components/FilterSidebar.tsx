@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Filter } from "lucide-react";
 import { FilterComponent } from "./FilterComponent";
 import { useRecoilState } from "recoil";
@@ -9,18 +9,28 @@ export const FilterSidebar = () => {
 
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger>
-          <button className="flex items-center p-2">
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerTrigger asChild>
+          <button className="p-3 bg-primary text-text rounded-md flex items-center gap-2">
             <Filter className="h-5 w-5" />
-            <span className="ml-2">Filters</span>
+            <span>Filters</span>
           </button>
-        </SheetTrigger>
-        
-        <SheetContent side="right" className="p-4 w-72">
+        </DrawerTrigger>
+
+        <DrawerContent className="w-80 fixed right-0 top-0 h-screen bg-background shadow-lg z-50 p-4">
+          <div className="flex justify-between items-center pb-4 border-b border-text/20">
+            <h2 className="text-lg font-semibold">Filters</h2>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-2 text-text/60 hover:text-text/30"
+            >
+              ✕
+            </button>
+          </div>
+
           <FilterComponent />
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 };

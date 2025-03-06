@@ -19,7 +19,7 @@ export default function Layout({ isLoading }: LayoutProps) {
         <div className="flex flex-col">
           <main className="flex-1">
             {isLoading ? (
-              <div className="bg-background text-primary text-6xl w-screen h-screen flex justify-center items-center">
+              <div className="bg-background text-primary text-6xl w-full h-screen flex justify-center items-center">
                 <AiOutlineLoading3Quarters className="animate-spin" />
               </div>
             ) : (
