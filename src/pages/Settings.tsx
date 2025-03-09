@@ -9,12 +9,12 @@ import { User } from "@/types";
 import useAuth from "@/hooks/auth";
 
 const Settings = () => {
-  const [_user, setUser] = useRecoilState<User | null>(userState);
-  const userData = useAuth();  
+  const [user, setUser] = useRecoilState<User | null>(userState); // Ensure User type is correct
+  const userData = useAuth();
+
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Initialize state for form data
   const [formData, setFormData] = useState<Partial<User>>({
     userName: "",
     email: "",
@@ -25,26 +25,26 @@ const Settings = () => {
   });
 
   useEffect(() => {
-    if (userData.userData) {
+    if (userData?.userData) {
       setFormData({
         userName: userData.userData.username || "",
         email: userData.userData.email || "",
         address1: userData.userData.address?.address1 || "",
-        city: userData.userData.address.city || "",
-        state: userData.userData.address.state || "",
-        postalCode: userData.userData.address.postalCode || "",
+        city: userData.userData.address?.city || "",
+        state: userData.userData.address?.state || "",
+        postalCode: userData.userData.address?.postalCode || "",
       });
     }
-  }, [userData.userData]); 
+  }, [userData?.userData]); // Added optional chaining to prevent undefined errors
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await updateUser(formData, setUser);
+      await updateUser(formData as User, setUser); // Ensure correct User type
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
