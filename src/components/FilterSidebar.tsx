@@ -1,11 +1,11 @@
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Filter } from "lucide-react";
 import { FilterComponent } from "./FilterComponent";
-import { useRecoilState } from "recoil";
-import { filterSidebar } from "@/store/visible";
+import { useState } from "react";
+// import { filterSidebar } from "@/store/visible";
 
 export const FilterSidebar = () => {
-  const [isOpen, setIsOpen] = useRecoilState(filterSidebar);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <>
