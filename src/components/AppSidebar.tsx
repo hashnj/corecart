@@ -29,7 +29,7 @@ import { useRecoilState, useRecoilValueLoadable } from "recoil";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 // import axiosInstance from "@/lib/axiosInstance";
 import { AuthResponse } from "@/types";
-import { useLogout } from "@/store/user";
+import { useLogout } from "@/hooks/useLogout";
 
 const items = [
   { title: "Home", url: "/", icon: FaHome },

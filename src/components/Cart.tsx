@@ -13,7 +13,7 @@ export const Cartt: React.FC<CarttProps> = ({ quty, id }) => {
   const cartData = useRecoilValueLoadable(getCart);
 
   useEffect(() => {
-    if (cartData.state === "hasValue" && cart.length === 0) {
+    if (cartData.state === "hasValue" && JSON.stringify(cart) !== JSON.stringify(cartData.contents)) {
       setCart(cartData.contents);
     }
   }, [cartData, cart, setCart]);

@@ -13,10 +13,12 @@ export const getWishlist = selector({
   get: async () => {
     try {
       const response = await axiosInstance.get(`/wishlist`);
+      localStorage.setItem("wishlist", JSON.stringify(response.data.wishlist));
       return response.data.wishlist[0].product_id || [];
     } catch (error) {
       console.error("Failed to fetch wishlist:", error);
-      return [];
+      const wishlist = localStorage.getItem("wishlist");
+      return wishlist ? JSON.parse(wishlist) : [];
     }
   },
 });
@@ -26,9 +28,11 @@ export const addToWishlist = async (
   setWishlist: (updater: (prev: any[]) => any[]) => void
 ) => {
   try {
-    await axiosInstance.post(`/wishlist/add`, { productId: productId });
+    await axiosInstance.post(`/wishlist/add`, { productId });
+    const response = await axiosInstance.get(`/wishlist`);
+    localStorage.setItem("wishlist", JSON.stringify(response.data.wishlist));
     toast.success("Added to wishlist");
-    setWishlist((prev) => [...prev, productId]);
+    setWishlist(response.data.wishlist);
   } catch (error) {
     console.error("Failed to add to wishlist:", error);
   }
@@ -40,24 +44,24 @@ export const removeFromWishlist = async (
 ) => {
   try {
     await axiosInstance.delete(`/wishlist/remove/${productId}`);
-    setWishlist((prev) => prev.filter((product) => product._id !== productId));
+    const response = await axiosInstance.get(`/wishlist`);
+    localStorage.setItem("wishlist", JSON.stringify(response.data.wishlist));
     toast.success("Removed from wishlist");
+    setWishlist(response.data.wishlist);
   } catch (error) {
     console.error("Failed to remove from wishlist:", error);
   }
 };
-
 
 export const removeAll = async (
   setWishlist: (updater: (prev: any[]) => any[]) => void
 ) => {
   try {
     await axiosInstance.delete(`/wishlist/remove`);
+    localStorage.removeItem("wishlist");
     toast.success("Wishlist cleared");
-
-    setWishlist(() => []); 
+    setWishlist(()=>[]);
   } catch (error) {
     console.error("Failed to remove all wishlist items:", error);
   }
 };
-

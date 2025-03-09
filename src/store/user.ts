@@ -1,31 +1,30 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { atom } from "recoil";
 import axiosInstance from "@/lib/axiosInstance";
-import { useRecoilState } from "recoil";
-import { useNavigate } from "react-router-dom";
+import { SetterOrUpdater } from "recoil";
 import { toast } from "react-toastify";
-import { auth } from "@/store/auth";
+import { User } from "@/types";
 
-export const useLogout = () => {
-  const navigate = useNavigate();
-  const [_authh, setAuth] = useRecoilState(auth);
 
-  const handleLogOut = async () => {
-    try {
-      const response = await axiosInstance.post("/auth/logout");
+export const userState = atom<User|null>({
+  key: "userState",
+  default: null, 
+});
 
-      if (response.status === 200) {
-        setAuth(null);
-        toast.success("Logged out successfully!");
-        navigate("/login"); 
-      } else {
-        toast.error("Logout failed. Please try again.");
-      }
-    } catch (error: any) {
-      console.error("Logout error:", error.response?.data || error.message);
-      toast.error("Already logged out or network issue.");
+export const updateUser = async (
+  userData: Partial<User>, 
+  setUser: SetterOrUpdater<User|null>
+) => {
+  try {
+    const response = await axiosInstance.put("/user/update", userData);
+
+    if (response.status === 200) {
+      setUser(response.data.user); 
+      toast.success("Profile updated successfully!");
+    } else {
+      toast.error("Failed to update profile.");
     }
-  };
-
-  return handleLogOut;
+  } catch (error) {
+    console.error("Update Error:", error);
+    toast.error("Error updating profile.");
+  }
 };

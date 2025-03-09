@@ -12,7 +12,9 @@ export const FilterComponent: React.FC = () => {
   // const setSidebar = useSetRecoilState(filterSidebar);
 
   // Handle input changes
-  const handleFilterChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleFilterChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFilters((prev) => ({
       ...prev,
@@ -29,8 +31,10 @@ export const FilterComponent: React.FC = () => {
 
   // Render category options
   const renderCategories = () => {
-    if (categoriesLoadable.state === "loading") return <option>Loading categories...</option>;
-    if (categoriesLoadable.state === "hasError") return <option>Error loading categories</option>;
+    if (categoriesLoadable.state === "loading")
+      return <option>Loading categories...</option>;
+    if (categoriesLoadable.state === "hasError")
+      return <option>Error loading categories</option>;
 
     return categoriesLoadable.contents.categories.map((category: Category) => (
       <option key={category._id} value={category._id}>
@@ -68,7 +72,7 @@ export const FilterComponent: React.FC = () => {
 
       {/* Price Range */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Price Range (₹)</label>
+        <label className="text-sm font-medium">Price Range ($)</label>
 
         <div className="flex items-center space-x-2">
           <span className="text-sm">Min: {filters.minPrice}</span>

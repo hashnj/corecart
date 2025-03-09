@@ -1,19 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useRecoilState, useRecoilValueLoadable, useSetRecoilState, useRecoilRefresher_UNSTABLE } from "recoil";
+import {
+  useRecoilState,
+  useRecoilValueLoadable,
+  useSetRecoilState,
+  useRecoilRefresher_UNSTABLE,
+} from "recoil";
 import { useEffect, useState } from "react";
-import { FaCartArrowDown, FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaCartArrowDown, FaHeart, FaRegHeart, FaStar } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useParams } from "react-router-dom";
-import { getWishlist, wishlistState, addToWishlist, removeFromWishlist } from "../store/wishList";
+import {
+  getWishlist,
+  wishlistState,
+  addToWishlist,
+  removeFromWishlist,
+} from "../store/wishList";
 import { cartState, getCart, addToCart, removeFromCart } from "@/store/cart";
 import { getProductById, productIdAtom } from "@/store/products";
-import BuyProcessing from "../components/BuyProcessing";
-import { buyM } from "../store/buy";
 import { Product } from "@/types";
 import { STRIPE_PUBLIC_KEY } from "@/config";
 import axiosInstance from "@/lib/axiosInstance";
 import { loadStripe } from "@stripe/stripe-js";
-
 
 const ProductInfo = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +28,6 @@ const ProductInfo = () => {
 
   const [wishlist, setWishlist] = useRecoilState(wishlistState);
   const [cart, setCart] = useRecoilState(cartState);
-  const [buy, _setBuy] = useRecoilState(buyM);
   const [pic, setPic] = useState<string>("");
 
   const wishlistData = useRecoilValueLoadable(getWishlist);
@@ -31,11 +36,7 @@ const ProductInfo = () => {
   const refreshWishlist = useRecoilRefresher_UNSTABLE(getWishlist);
   const refreshCart = useRecoilRefresher_UNSTABLE(getCart);
 
-  
-const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
-
-
-
+  const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
 
   useEffect(() => {
     if (id) setProductId(id);
@@ -55,8 +56,8 @@ const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
 
   useEffect(() => {
     if (productData.state === "hasValue" && productData.contents) {
-      if (productData.contents.thumbnail) {
-        setPic(productData.contents.thumbnail);
+      if (productData.contents.images) {
+        setPic(productData.contents.images[0]);
       }
     }
   }, [productData]);
@@ -87,13 +88,16 @@ const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
 
   const handleBuyNow = async () => {
     if (!product) return;
-  
+
     try {
       const stripe = await stripePromise;
-      const { data } = await axiosInstance.post(`/order/create-checkout-session`, {
-        cartItems: [{ product_id: product, quantity: 1 }], // ✅ Send a single product
-      });
-  
+      const { data } = await axiosInstance.post(
+        `/order/create-checkout-session`,
+        {
+          cartItems: [{ product_id: product, quantity: 1 }], // ✅ Send a single product
+        }
+      );
+
       await stripe?.redirectToCheckout({ sessionId: data.id });
     } catch (error) {
       console.error("Stripe Checkout Error:", error);
@@ -128,14 +132,6 @@ const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
 
   return (
     <div className="bg-background text-text w-full min-h-screen">
-      {buy && (
-        <div className="fixed inset-0 flex justify-center items-center backdrop-blur-md z-10">
-          <div className="max-w-xl w-4/5 md:w-3/5 h-5/6 bg-background border border-gray-300 rounded-lg shadow-lg p-4">
-            <BuyProcessing />
-          </div>
-        </div>
-      )}
-
       <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <div className="flex flex-col sm:flex-row md:flex-col items-center">
@@ -164,7 +160,8 @@ const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
                 <strong>Brand:</strong> {product.brand || "N/A"}
               </p>
               <p>
-                <strong>Category:</strong> {product.category || "N/A"}</p>
+                <strong>Category:</strong> {product.category || "N/A"}
+              </p>
               <p>
                 <strong>Weight:</strong>{" "}
                 {product.weight ? `${product.weight} kg` : "N/A"}
@@ -204,9 +201,9 @@ const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
             <p className="text-lg text-gray-500">{product.description}</p>
             <div className="flex items-center gap-4">
               <span className="text-xl font-semibold text-primary/90">
-                ₹{product.price}
+                ${product.price}
               </span>
-              <span className="text-lg text-text/50 line-through">₹{mrp}</span>
+              <span className="text-lg text-text/50 line-through">${mrp}</span>
               {product.discountPercentage && (
                 <span className="text-lg text-green-500">
                   {product.discountPercentage}% Off
@@ -235,6 +232,34 @@ const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
               </button>
             </div>
           </div>
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold m-2 my-4 ">Reviews</h1>
+          {product?.reviews?.map(r=>
+            <div className="w-full p-4 rounded-xl bg-backgrounds/50">
+              <div className="flex justify-between">
+              <div className="flex ">
+                <div className="bg-backgrounds w-12 font-bold h-12 flex justify-center items-center rounded-full m-2 mt-0">
+                  {r.reviewerName.split(' ')[0][0]}{r.reviewerName.split(' ')[1][0]}
+                </div>
+              <div className="flex flex-col">
+              <span className="text-xl">
+              {r.reviewerName}
+              </span>
+              <span className="text-text/40">
+              {r.reviewerEmail}
+              </span>
+              </div>
+              </div>
+              <div className="flex justify-center items-center">
+              {r.rating} <FaStar className="text-yellow-500"/>
+              </div>
+              </div>
+              <div className="m-2 font-thin pl-14">
+                {r.comment}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

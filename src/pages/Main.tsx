@@ -5,7 +5,6 @@ import { useEffect, useState, useRef } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useRecoilState } from "recoil";
 import { search } from "@/store/search";
-import { ToastContainer } from "react-toastify";
 
 const Main = () => {
   const navigate = useNavigate();
@@ -33,17 +32,6 @@ const Main = () => {
 
   return (
     <div className="p-2 min-h-screen h-full">
-      
-      <ToastContainer 
-        position="top-center" 
-        autoClose={30} 
-        hideProgressBar={true} 
-        newestOnTop 
-        closeButton={false} 
-        rtl={false} 
-        theme="dark" 
-        pauseOnFocusLoss 
-      />
 
       <div className="w-full min-h-screen bg-gradient-to-tr from-primary/20 to-primary/70 text-text flex flex-col items-center justify-center">
         <div className="text-center px-6">

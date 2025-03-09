@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "@/lib/axiosInstance";
 
-export const syncCart = async (localCart: any[]) => {
+const syncCart = async (localCart: any[]) => {
   try {
     const res = await axiosInstance.post(`/cart/sync`, { cart: localCart }, { withCredentials: true });
     return res.data.cart; 
@@ -10,3 +10,5 @@ export const syncCart = async (localCart: any[]) => {
     return localCart; 
   }
 };
+
+export default syncCart;

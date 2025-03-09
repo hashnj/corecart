@@ -73,9 +73,11 @@ export interface User {
 
 export interface Review {
   _id: string;
+  reviewerName:string;
+  reviewerEmail:string;
   rating: number;
   comment: string;
-  userId: string;
+  date: Date;
 }
 export interface ProductEditState {
   category: string;

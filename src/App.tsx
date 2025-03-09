@@ -28,64 +28,54 @@ function App() {
   }, []);
 
   return (
-    <Suspense
-      fallback={
-        <div className="bg-background text-primary text-6xl w-screen h-screen flex justify-center items-center">
-          <AiOutlineLoading3Quarters className="animate-spin" />
-        </div>
-      }
-    >
-      <WishlistLoader />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/auth/register" element={<SignUp />} />
-          <Route path="/auth/login" element={<SignIn />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
-
-          
-          <Route path="/*" element={<Layout isLoading={isLoading} />}>
-            <Route index element={<Main />} /> 
-            <Route path="product/:id" element={<ProductInfo />} />
-            <Route element={<RequireAuth allowedRoles={['Customer', 'Admin', 'Vendor']} />}>
-              <Route path="settings" element={<Settings />} />
-              <Route path="wishlist" element={<WishPage />} />
-              <Route path="cart" element={<CartPage />} />
-              <Route path="explore" element={<Products />} />
-              {/* <Route path="checkout" element={<Checkout/>}/> */}
-              <Route path="*" element={<NotFound />} />
-
-            </Route>
-            <Route element={<RequireAuth allowedRoles={['Customer', 'Admin', 'Vendor','']} />}>
-            <Route path="test" element={<Test />} />
-            </Route>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+    <>
+      {/* ✅ Move ToastContainer here */}
       <ToastContainer
-      position="bottom-right"
-      autoClose={1000}
-      hideProgressBar={true}
-      newestOnTop={true}
-      closeOnClick
-      rtl={false}
-      pauseOnFocusLoss
-      closeButton={false}
-      draggable
-      theme="dark" 
-    />
-    </Suspense>
+        position="bottom-right"
+        autoClose={1000}
+        hideProgressBar={true}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        closeButton={false}
+        draggable
+        theme="dark"
+      />
+
+      <Suspense
+        fallback={
+          <div className="bg-background text-primary text-6xl w-screen h-screen flex justify-center items-center">
+            <AiOutlineLoading3Quarters className="animate-spin" />
+          </div>
+        }
+      >
+        <WishlistLoader />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/auth/register" element={<SignUp />} />
+            <Route path="/auth/login" element={<SignIn />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+
+            <Route path="/*" element={<Layout isLoading={isLoading} />}>
+              <Route index element={<Main />} />
+              <Route path="product/:id" element={<ProductInfo />} />
+              <Route element={<RequireAuth allowedRoles={['Customer', 'Admin', 'Vendor']} />}>
+                <Route path="settings" element={<Settings />} />
+                <Route path="wishlist" element={<WishPage />} />
+                <Route path="cart" element={<CartPage />} />
+                <Route path="explore" element={<Products />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+              <Route element={<RequireAuth allowedRoles={['Customer', 'Admin', 'Vendor','']} />}>
+                <Route path="test" element={<Test />} />
+              </Route>
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </Suspense>
+    </>
   );
 }
 
 export default App;
-
-
-          
-   
-{/* 
-            <Route path="/product/:id" element={<ProductInfo />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order/:id" element={<Success />} /> */}
-          
-          
-          {/*  */}

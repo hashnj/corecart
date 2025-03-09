@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { selector } from "recoil";
 import { B_Url } from "../config";
 import { Category, Product, SubCategory } from "@/types";

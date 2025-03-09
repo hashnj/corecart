@@ -16,7 +16,7 @@ const WishPage = () => {
 
   useEffect(() => {
     if (wishlistData.state === "hasValue") {
-      console.log(wishlistData.contents);
+      // console.log(wishlistData.contents);
       setWishList(wishlistData.contents);
     }
   }, [wishlistData, setWishList]);
