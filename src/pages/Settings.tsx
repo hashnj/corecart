@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { userState, updateUser } from "../store/user";
@@ -9,7 +8,8 @@ import { User } from "@/types";
 import useAuth from "@/hooks/auth";
 
 const Settings = () => {
-  const [user, setUser] = useRecoilState<User | null>(userState); // Ensure User type is correct
+  const [user, setUser] = useRecoilState<User | null>(userState); 
+  console.log(user);
   const userData = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -44,7 +44,7 @@ const Settings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await updateUser(formData as User, setUser); // Ensure correct User type
+      await updateUser(formData as User, setUser); 
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
